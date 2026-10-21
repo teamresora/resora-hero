@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Resora Problem Scale</title>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+html,body{margin:0;height:100%;background:#050d1f;overflow:hidden;font-family:'IBM Plex Mono',ui-monospace,monospace;color:#f4f7fb}
+#stage{position:fixed;inset:0}
+#stage canvas{display:block;width:100%;height:100%}
+.vig{position:fixed;inset:0;pointer-events:none;background:radial-gradient(ellipse at 62% 45%,transparent 38%,rgba(3,8,20,.8) 100%)}
+.panel{position:fixed;left:max(24px,5vw);top:50%;transform:translateY(-50%);width:min(440px,calc(100vw - 48px));padding:20px 22px;border-radius:18px;background:linear-gradient(180deg,rgba(0,194,186,.14),rgba(8,28,50,.42));border:1px solid rgba(0,194,186,.5);box-shadow:0 0 40px rgba(0,194,186,.2);backdrop-filter:blur(3px)}
+.kick{font:500 11px/1 'IBM Plex Mono',monospace;letter-spacing:.16em;text-transform:uppercase;color:#00c2ba}
+h2{font-family:'Unbounded',sans-serif;font-size:clamp(20px,2.2vw,26px);line-height:1.2;margin:10px 0 12px}
+p{font-size:14px;line-height:1.6;color:#9fb3d1;margin:0 0 14px}
+.opt{display:flex;align-items:center;gap:12px;padding:10px 12px;border:1px solid rgba(0,194,186,.3);border-radius:12px;margin:8px 0;cursor:pointer;font-size:14px}
+.opt input{accent-color:#ff5a5f;width:18px;height:18px;margin:0}
+.opt.on{border-color:#ff5a5f;background:rgba(255,90,95,.08)}
+#verdict{margin-top:14px;font-family:'Unbounded',sans-serif;font-size:15px;line-height:1.35;color:#00c2ba;min-height:40px}
+#verdict.warn{color:#ff5a5f}
+@media (max-width:700px){.panel{top:auto;bottom:12px;left:12px;right:12px;transform:none;width:auto;padding:16px 18px;background:rgba(6,20,40,.92)}h2{font-size:20px}}
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+<script src="data-teal.js"></script>
+</head>
+<body>
+<div id="stage"></div>
+<div class="vig"></div>
+<div class="panel">
+  <div class="kick">The problem</div>
+  <h2>Tick what applies to your Filipino team member.</h2>
+  <p>Australian courts look at how the work is actually done, not the contract title.</p>
+  <label class="opt" id="o1"><input type="checkbox" data-k="1"> They work set hours</label>
+  <label class="opt" id="o2"><input type="checkbox" data-k="2"> They follow your direction</label>
+  <label class="opt" id="o3"><input type="checkbox" data-k="3"> They use your tools and systems</label>
+  <div id="verdict"></div>
+</div>
+<script>
+(function(){
+  var stage=document.getElementById('stage');
+  var verdict=document.getElementById('verdict');
+  var checks=[].slice.call(document.querySelectorAll('input[data-k]'));
+
+  var renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});
+  renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+  renderer.outputEncoding=THREE.sRGBEncoding;
+  renderer.shadowMap.enabled=true;
+  renderer.setClearColor(0x000000,0);
+  stage.appendChild(renderer.domElement);
+
+  var scene=new THREE.Scene();
+  var cam=new THREE.PerspectiveCamera(30,1,0.1,100);
+  scene.add(new THREE.HemisphereLight(0x6f8fd0,0x03070f,0.35));
+  var key=new THREE.SpotLight(0xffe1b0,2.2,20,Math.PI/5,0.8,1.4);
+  key.position.set(-3,9,6); key.target.position.set(0,0.8,0); key.castShadow=true;
+  scene.add(key); scene.add(key.target);
+  var rim=new THREE.DirectionalLight(0x4fe6dd,1.6); rim.position.set(4,3,-3); scene.add(rim);
+
+  var floor=new THREE.Mesh(new THREE.CircleGeometry(5,96),new THREE.ShadowMaterial({opacity:0.5}));
+  floor.rotation.x=-Math.PI/2; floor.receiveShadow=true; scene.add(floor);
+  var plate=new THREE.Mesh(new THREE.CircleGeometry(4.6,96),new THREE.MeshStandardMaterial({color:0x03101f,roughness:0.4,metalness:0.5,transparent:true,opacity:0.9}));
+  plate.rotation.x=-Math.PI/2; plate.position.y=0.001; scene.add(plate);
+  var ring=new THREE.Mesh(new THREE.RingGeometry(4.56,4.62,160),new THREE.MeshBasicMaterial({color:0x00c2ba,transparent:true,opacity:0.9}));
+  ring.rotation.x=-Math.PI/2; ring.position.y=0.003; scene.add(ring);
+
+  function mat(c,extra){return new THREE.MeshStandardMaterial(Object.assign({color:c,roughness:0.35,metalness:0.4},extra||{}));}
+  var metal=mat(0xc9d6e6,{metalness:0.85,roughness:0.25});
+  var dark=mat(0x0b2236,{metalness:0.6,roughness:0.4});
+  var teal=mat(0x00c2ba,{emissive:0x00c2ba,emissiveIntensity:0.35});
+  var red=mat(0xff5a5f,{emissive:0xff5a5f,emissiveIntensity:0.35});
+
+  /* the balance scale: a base, a post, and a pivoting beam */
+  var base=new THREE.Mesh(new THREE.CylinderGeometry(0.7,0.8,0.25,48),dark);
+  base.position.set(0,0.125,0); base.castShadow=true; base.receiveShadow=true; scene.add(base);
+  var post=new THREE.Mesh(new THREE.CylinderGeometry(0.07,0.07,2.6,24),metal);
+  post.position.set(0,1.55,0); post.castShadow=true; scene.add(post);
+  var pivot=new THREE.Group(); pivot.position.set(0,2.85,0); scene.add(pivot);
+  var beam=new THREE.Mesh(new THREE.BoxGeometry(2.8,0.06,0.06),metal); beam.castShadow=true; pivot.add(beam);
+  var cap=new THREE.Mesh(new THREE.SphereGeometry(0.1,24,16),red); pivot.add(cap);
+
+  var PAN_Y=-1.12, PAN_X=1.4;
+  function makePan(x){
+    var g=new THREE.Group(); g.position.set(x,0,0); pivot.add(g);
+    var str=new THREE.Mesh(new THREE.CylinderGeometry(0.01,0.01,1.1,8),metal); str.position.set(0,-0.55,0); g.add(str);
+    var tray=new THREE.Mesh(new THREE.CylinderGeometry(0.32,0.32,0.04,48),dark); tray.position.set(0,PAN_Y,0); tray.castShadow=true; g.add(tray);
+    return g;
+  }
+  var leftPan=makePan(-PAN_X), rightPan=makePan(PAN_X);
+
+  /* the contractor side always carries one fixed weight, so the scale starts leaning that way */
+  var anchor=new THREE.Mesh(new THREE.BoxGeometry(0.22,0.22,0.22),red);
+  anchor.position.set(0,PAN_Y+0.15,0); anchor.castShadow=true; leftPan.add(anchor);
+
+  /* one weight per ticked item lands on the employee pan */
+  var weights=[null,null,null];
+  var WEIGHT_Y=PAN_Y+0.15;
+  function weightAt(i){
+    var w=new THREE.Mesh(new THREE.BoxGeometry(0.2,0.2,0.2),teal);
+    w.castShadow=true;
+    w.position.set((i-1)*0.14,WEIGHT_Y+1.2,0);
+    w.scale.setScalar(0.001);
+    rightPan.add(w);
+    return w;
+  }
+  weights=[weightAt(0),weightAt(1),weightAt(2)];
+
+  /* the teal mascot stands beside the scale and bobs in place */
+  var H=1.7, holder=new THREE.Group();
+  holder.position.set(2.6,0,0.6); holder.rotation.y=-0.28;
+  scene.add(holder);
+  var bin=null; try{bin=atob(window.MB_TEAL);}catch(e){bin=null;}
+  if(bin){
+    var buf=new Uint8Array(bin.length);
+    for(var k=0;k<bin.length;k++){buf[k]=bin.charCodeAt(k);}
+    new THREE.GLTFLoader().parse(buf.buffer,'',function(gltf){
+      var m=gltf.scene;
+      m.rotation.y=-Math.PI/2;
+      m.updateMatrixWorld(true);
+      var box=new THREE.Box3().setFromObject(m);
+      m.scale.setScalar(H/box.getSize(new THREE.Vector3()).y);
+      m.updateMatrixWorld(true);
+      box=new THREE.Box3().setFromObject(m);
+      var cen=box.getCenter(new THREE.Vector3());
+      m.position.set(-cen.x,-box.min.y,-cen.z);
+      m.traverse(function(o){ if(o.isMesh){ o.castShadow=true; o.receiveShadow=true; } });
+      holder.add(m);
+    },function(){});
+  }
+
+  /* layout and camera */
+  function layout(){
+    var w=innerWidth,h=innerHeight;
+    renderer.setSize(w,h,false);
+    cam.aspect=w/h;
+    if(w<700){ cam.fov=44; cam.position.set(0,2.6,13); cam.lookAt(0.6,1.7,0); }
+    else { cam.fov=30; cam.position.set(0,2.4,10); cam.lookAt(-1.5,1.5,0); }
+    cam.updateProjectionMatrix();
+  }
+  layout();
+  addEventListener('resize',layout);
+
+  /* the verdict and the beam angle both come from how many boxes are ticked */
+  var target=0, current=0;
+  function update(){
+    var n=checks.filter(function(c){return c.checked;}).length;
+    checks.forEach(function(c){ c.parentNode.classList.toggle('on',c.checked); });
+    for(var i=0;i<3;i++){ weights[i].userData.on = (i<n); }
+    /* positive target tips the employee side down; the anchor alone leans it the other way */
+    target=Math.max(-0.22,Math.min(0.34,(n-1)*0.2));
+    if(n===0){ verdict.textContent='Looks like a contractor, but check the full picture before you rely on it.'; verdict.className=''; }
+    else if(n===1){ verdict.textContent='Borderline. Get it checked before you hire.'; verdict.className=''; }
+    else { verdict.textContent='Likely an employee under Australian law. Resora employs them for you.'; verdict.className='warn'; }
+  }
+  checks.forEach(function(c){ c.addEventListener('change',update); });
+  update();
+
+  var t0=performance.now();
+  var reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function frame(now){
+    var t=reduce?0:(now-t0)/1000;
+    /* ease the beam toward its target, keeping the pans level */
+    current+=(target-current)*0.08;
+    pivot.rotation.z=-current;
+    leftPan.rotation.z=current;
+    rightPan.rotation.z=current;
+    /* weights drop into place and grow in */
+    for(var i=0;i<3;i++){
+      var w=weights[i];
+      var on=w.userData.on?1:0;
+      var s=w.scale.x+(on-w.scale.x)*0.12;
+      w.scale.setScalar(Math.max(0.001,s));
+      var targetY=w.userData.on?WEIGHT_Y+0.2:WEIGHT_Y+1.2;
+      w.position.y+=(targetY-w.position.y)*0.1;
+    }
+    holder.position.y=reduce?0:Math.sin(t*1.6)*0.03;
+    renderer.render(scene,cam);
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
