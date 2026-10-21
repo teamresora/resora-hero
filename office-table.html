@@ -35,12 +35,13 @@ html,body{margin:0;background:#050d1f;color:#f4f7fb;font-family:'IBM Plex Mono',
 <script>
 (function(){
   /* the five presenters, in the order they take the front seat */
+  /* hex: monitor screen, rim: table ring, css: hologram frame and fill, kick: label colour */
   var SECTIONS=[
-    {model:'MB_TEAL',  hex:0x00c2ba, css:'0,194,186',   kick:'The problem',  head:'Your Filipino team member may be an employee.', body:'If they work set hours and follow your direction, courts may treat them as your employee.'},
-    {model:'MB_RED',   hex:0xff5a5f, css:'255,90,95',   kick:'How it works', head:'Resora employs them for you.', body:'We recruit, employ, pay and manage. You lead the work, and we carry the employer load.'},
-    {model:'MB_YELLOW',hex:0xffd60a, css:'255,214,10',  kick:'The talent',   head:'Business-ready English. AEST hours.', body:'Strong AI-tool skills, 40+ years of Australian business experience behind the team.'},
-    {model:'MB_NAVY',  hex:0x4f6fd6, css:'79,111,214',  kick:'Pricing',      head:'No salary markup. No setup fee.', body:'Recruitment from $4,750, then management from $200 a month per team member.'},
-    {model:'MB_WHITE', hex:0xf4f7fb, css:'244,247,251', kick:'Compliance',   head:'Fully compliant with Australian law.', body:'Fair Work protected. Payroll, super and leave handled for you, every pay run.'}
+    {model:'MB_TEAL',  hex:0x00c2ba, rim:0x00c2ba, css:'0,194,186',   fill:0.10, kick:'0,194,186',   kickName:'The problem',  head:'Your Filipino team member may be an employee.', body:'If they work set hours and follow your direction, courts may treat them as your employee.'},
+    {model:'MB_RED',   hex:0xff5a5f, rim:0xff5a5f, css:'255,90,95',   fill:0.10, kick:'255,90,95',   kickName:'How it works', head:'Resora employs them for you.', body:'We recruit, employ, pay and manage. You lead the work, and we carry the employer load.'},
+    {model:'MB_YELLOW',hex:0xffd60a, rim:0xffd60a, css:'255,214,10',  fill:0.10, kick:'255,214,10',  kickName:'The talent',   head:'Business-ready English. AEST hours.', body:'Strong AI-tool skills, 40+ years of Australian business experience behind the team.'},
+    {model:'MB_NAVY',  hex:0x2d2d4e, rim:0xffffff, css:'26,26,46',    fill:0.65, kick:'255,255,255', kickName:'Pricing',      head:'No salary markup. No setup fee.', body:'Recruitment from $4,750, then management from $200 a month per team member.'},
+    {model:'MB_WHITE', hex:0xffffff, rim:0xffffff, css:'255,255,255', fill:0.08, kick:'255,255,255', kickName:'Compliance',   head:'Fully compliant with Australian law.', body:'Fair Work protected. Payroll, super and leave handled for you, every pay run.'}
   ];
   var N=SECTIONS.length, R=2.4, H=1.4;
   var track=document.getElementById('track');
@@ -67,14 +68,14 @@ html,body{margin:0;background:#050d1f;color:#f4f7fb;font-family:'IBM Plex Mono',
   function mat(c,extra){return new THREE.MeshStandardMaterial(Object.assign({color:c,roughness:0.35,metalness:0.4},extra||{}));}
   var floor=new THREE.Mesh(new THREE.CircleGeometry(6,96),new THREE.ShadowMaterial({opacity:0.5}));
   floor.rotation.x=-Math.PI/2; floor.receiveShadow=true; scene.add(floor);
-  var plate=new THREE.Mesh(new THREE.CircleGeometry(5.4,96),mat(0x03101f,{roughness:0.4,metalness:0.5,transparent:true,opacity:0.9}));
+  var plate=new THREE.Mesh(new THREE.CircleGeometry(5.4,96),mat(0x1a1a2e,{roughness:0.4,metalness:0.5,transparent:true,opacity:0.9}));
   plate.rotation.x=-Math.PI/2; plate.position.y=0.001; scene.add(plate);
-  var ring=new THREE.Mesh(new THREE.RingGeometry(5.36,5.42,160),new THREE.MeshBasicMaterial({color:0x00c2ba,transparent:true,opacity:0.9}));
+  var ring=new THREE.Mesh(new THREE.RingGeometry(5.36,5.42,160),new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:0.18}));
   ring.rotation.x=-Math.PI/2; ring.position.y=0.003; scene.add(ring);
 
   /* the rotating table: a round top on a single pedestal */
   var table=new THREE.Group(); scene.add(table);
-  var top=new THREE.Mesh(new THREE.CylinderGeometry(R+0.2,R+0.2,0.12,96),mat(0x0b2236,{metalness:0.6,roughness:0.35}));
+  var top=new THREE.Mesh(new THREE.CylinderGeometry(R+0.2,R+0.2,0.12,96),mat(0x1e2035,{metalness:0.6,roughness:0.35}));
   top.position.y=0.55; top.castShadow=true; top.receiveShadow=true; table.add(top);
   var rimRing=new THREE.Mesh(new THREE.TorusGeometry(R+0.2,0.03,12,128),mat(0x00c2ba,{emissive:0x00c2ba,emissiveIntensity:0.5}));  rimRing.rotation.x=Math.PI/2; rimRing.position.y=0.62; table.add(rimRing);
   var pedestal=new THREE.Mesh(new THREE.CylinderGeometry(0.3,0.5,0.55,48),mat(0xc9d6e6,{metalness:0.85,roughness:0.25}));
@@ -90,12 +91,12 @@ html,body{margin:0;background:#050d1f;color:#f4f7fb;font-family:'IBM Plex Mono',
   function drawHolo(s){
     var ctx=hctx, W=holoCanvas.width, Hh=holoCanvas.height;
     ctx.clearRect(0,0,W,Hh);
-    ctx.fillStyle='rgba('+s.css+',0.10)'; ctx.fillRect(0,0,W,Hh);
+    ctx.fillStyle='rgba('+s.css+','+s.fill+')'; ctx.fillRect(0,0,W,Hh);
     ctx.strokeStyle='rgba('+s.css+',0.8)'; ctx.lineWidth=4; ctx.strokeRect(6,6,W-12,Hh-12);
     ctx.fillStyle='rgba(255,255,255,0.04)';
     for(var y=0;y<Hh;y+=4){ ctx.fillRect(0,y,W,1); }
-    ctx.fillStyle='rgb('+s.css+')'; ctx.font='500 30px "IBM Plex Mono", monospace';
-    ctx.fillText(s.kick.toUpperCase(),60,110);
+    ctx.fillStyle='rgb('+s.kick+')'; ctx.font='500 30px "IBM Plex Mono", monospace';
+    ctx.fillText(s.kickName.toUpperCase(),60,110);
     ctx.fillStyle='#f4f7fb'; ctx.font='800 64px "Unbounded", sans-serif';
     wrap(s.head,60,190,W-120,74);
     ctx.fillStyle='#9fb3d1'; ctx.font='400 32px "IBM Plex Mono", monospace';
@@ -126,7 +127,7 @@ html,body{margin:0;background:#050d1f;color:#f4f7fb;font-family:'IBM Plex Mono',
     var dpos=(R+0.6);
     st.desk.position.set(dpos*Math.sin(theta),0,dpos*Math.cos(theta));
     st.desk.rotation.y=theta;
-    var deskTop=new THREE.Mesh(new THREE.BoxGeometry(1.1,0.07,0.6),mat(0x0b2236,{metalness:0.5,roughness:0.4}));
+    var deskTop=new THREE.Mesh(new THREE.BoxGeometry(1.1,0.07,0.6),mat(0x2d2d4e,{metalness:0.5,roughness:0.4}));
     deskTop.position.y=0.9; deskTop.castShadow=true; deskTop.receiveShadow=true; st.desk.add(deskTop);
     table.add(st.desk);
 
@@ -199,8 +200,8 @@ html,body{margin:0;background:#050d1f;color:#f4f7fb;font-family:'IBM Plex Mono',
     if(idx!==active){
       active=idx;
       drawHolo(SECTIONS[idx]);
-      rimRing.material.color.setHex(SECTIONS[idx].hex);
-      rimRing.material.emissive.setHex(SECTIONS[idx].hex);
+      rimRing.material.color.setHex(SECTIONS[idx].rim);
+      rimRing.material.emissive.setHex(SECTIONS[idx].rim);
       dots.forEach(function(d,i){ d.classList.toggle('on',i===idx); });
     }
     holoOpacity+=((1)-holoOpacity)*0.08;
