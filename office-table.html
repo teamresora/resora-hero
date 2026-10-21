@@ -112,7 +112,7 @@ html,body{margin:0;background:#f5f5f5;color:#1a1a2e;font-family:'IBM Plex Mono',
   SECTIONS.forEach(function(s,i){
     var theta=i*Math.PI*2/N;
     var sin=Math.sin(theta), cos=Math.cos(theta);
-    var st={theta:theta,mascot:new THREE.Group(),monitor:new THREE.Group(),screenMat:null,level:0};
+    var st={theta:theta,mascot:new THREE.Group(),lean:null,chair:null,monitor:new THREE.Group(),screenMat:null,mascotR:RM,chairR:RC,leanAmt:0};
 
     /* monitor on the table, screen facing its own seat */
     st.monitor.position.set(RMO*sin,0.79,RMO*cos);
@@ -127,7 +127,7 @@ html,body{margin:0;background:#f5f5f5;color:#1a1a2e;font-family:'IBM Plex Mono',
     table.add(st.monitor);
 
     /* chair in front of the mascot, between the table and the mascot */
-    var chair=new THREE.Group(); chair.position.set(RC*sin,0,RC*cos); chair.rotation.y=theta+Math.PI; table.add(chair);
+    var chair=new THREE.Group(); chair.position.set(RC*sin,0,RC*cos); chair.rotation.y=theta+Math.PI; table.add(chair); st.chair=chair;
     var seat=new THREE.Mesh(new THREE.CylinderGeometry(0.26,0.26,0.07,40),mat(0x2d2d2d,{roughness:0.7}));
     seat.position.y=0.5; seat.castShadow=true; chair.add(seat);
     var back=new THREE.Mesh(new THREE.BoxGeometry(0.46,0.5,0.06),mat(0x2d2d2d,{roughness:0.7}));
@@ -139,6 +139,8 @@ html,body{margin:0;background:#f5f5f5;color:#1a1a2e;font-family:'IBM Plex Mono',
     st.mascot.position.set(RM*sin,0,RM*cos);
     st.mascot.rotation.y=theta+Math.PI;
     table.add(st.mascot);
+    /* the lean group tips the whole mascot sideways when it presents */
+    st.lean=new THREE.Group(); st.mascot.add(st.lean);
     var bin=null; try{bin=atob(window[s.model]);}catch(e){bin=null;}
     if(bin){
       var buf=new Uint8Array(bin.length);
@@ -154,7 +156,7 @@ html,body{margin:0;background:#f5f5f5;color:#1a1a2e;font-family:'IBM Plex Mono',
         var cen=box.getCenter(new THREE.Vector3());
         m.position.set(-cen.x,-box.min.y,-cen.z);
         m.traverse(function(o){ if(o.isMesh){ o.castShadow=true; o.receiveShadow=true; } });
-        st.mascot.add(m);
+        st.lean.add(m);
       },function(){});
     }
     stations.push(st);
@@ -205,6 +207,13 @@ html,body{margin:0;background:#f5f5f5;color:#1a1a2e;font-family:'IBM Plex Mono',
       /* the presenter's mascot turns to the camera and its monitor faces out */
       var mascotGoal=presenting?st.theta:st.theta+Math.PI;
       st.mascot.rotation.y=turn(st.mascot.rotation.y,mascotGoal,0.08);
+      /* the presenter moves from its chair onto the table edge, the chair slides away to make room */
+      st.mascotR+=((presenting?RT+0.05:RM)-st.mascotR)*0.06;
+      st.chairR+=((presenting?RC+0.9:RC)-st.chairR)*0.06;
+      st.mascot.position.set(st.mascotR*Math.sin(st.theta),0,st.mascotR*Math.cos(st.theta));
+      st.chair.position.set(st.chairR*Math.sin(st.theta),0,st.chairR*Math.cos(st.theta));
+      st.leanAmt+=((presenting?0.3:0)-st.leanAmt)*0.08;
+      st.lean.rotation.z=st.leanAmt;
       var monitorGoal=presenting?st.theta:st.theta+Math.PI;
       st.monitor.rotation.y=turn(st.monitor.rotation.y,monitorGoal,0.08);
       st.screenMat.opacity=1;
