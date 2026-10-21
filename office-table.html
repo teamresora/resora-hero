@@ -12,7 +12,7 @@ html,body{margin:0;background:#f5f5f5;color:#1a1a2e;font-family:'IBM Plex Mono',
 #stage{position:absolute;inset:0}
 #stage canvas{display:block;width:100%;height:100%}
 .dots{position:absolute;right:max(24px,4vw);top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:12px}
-.dots span{width:8px;height:8px;border-radius:9999px;background:rgba(26,26,46,.2);transition:background .3s,transform .3s}
+.dots span{width:8px;height:8px;border-radius:9999px;background:rgba(26,26,46,.25);transition:background .3s,transform .3s}
 .dots span.on{background:#ff5a5f;transform:scale(1.4)}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -32,13 +32,13 @@ html,body{margin:0;background:#f5f5f5;color:#1a1a2e;font-family:'IBM Plex Mono',
 </div>
 <script>
 (function(){
-  /* hex: monitor screen and rim trim, css: hologram frame, kick: hologram label colour */
+  /* the five presenters, in order. hex: monitor screen colour. */
   var SECTIONS=[
-    {model:'MB_TEAL',  hex:0x00c2ba, css:'0,194,186',   kick:'0,194,186',   kickName:'The problem',  head:'Your Filipino team member may be an employee.', body:'If they work set hours and follow your direction, courts may treat them as your employee.'},
-    {model:'MB_RED',   hex:0xff5a5f, css:'255,90,95',   kick:'255,90,95',   kickName:'How it works', head:'Resora employs them for you.', body:'We recruit, employ, pay and manage. You lead the work, and we carry the employer load.'},
-    {model:'MB_YELLOW',hex:0xffd60a, css:'255,214,10',  kick:'255,214,10',  kickName:'The talent',   head:'Business-ready English. AEST hours.', body:'Strong AI-tool skills, 40+ years of Australian business experience behind the team.'},
-    {model:'MB_NAVY',  hex:0x1a1a2e, css:'244,247,251', kick:'244,247,251', kickName:'Pricing',      head:'No salary markup. No setup fee.', body:'Recruitment from $4,750, then management from $200 a month per team member.'},
-    {model:'MB_WHITE', hex:0xffffff, css:'244,247,251', kick:'255,90,95',   kickName:'Compliance',   head:'Fully compliant with Australian law.', body:'Fair Work protected. Payroll, super and leave handled for you, every pay run.'}
+    {model:'MB_TEAL',  hex:0x00c2ba, kickName:'The problem',  head:'Your Filipino team member may be an employee.', body:'If they work set hours and follow your direction, courts may treat them as your employee.'},
+    {model:'MB_RED',   hex:0xff5a5f, kickName:'How it works', head:'Resora employs them for you.', body:'We recruit, employ, pay and manage. You lead the work, and we carry the employer load.'},
+    {model:'MB_YELLOW',hex:0xffd60a, kickName:'The talent',   head:'Business-ready English. AEST hours.', body:'Strong AI-tool skills, 40+ years of Australian business experience behind the team.'},
+    {model:'MB_NAVY',  hex:0x2d2d4e, kickName:'Pricing',      head:'No salary markup. No setup fee.', body:'Recruitment from $4,750, then management from $200 a month per team member.'},
+    {model:'MB_WHITE', hex:0xdddddd, kickName:'Compliance',   head:'Fully compliant with Australian law.', body:'Fair Work protected. Payroll, super and leave handled for you, every pay run.'}
   ];
   var N=SECTIONS.length, RT=1.5, RM=2.8, RC=2.35, RMO=0.95, H=1.4;
   var track=document.getElementById('track');
@@ -47,26 +47,66 @@ html,body{margin:0;background:#f5f5f5;color:#1a1a2e;font-family:'IBM Plex Mono',
   SECTIONS.forEach(function(){ dotsEl.appendChild(document.createElement('span')); });
   var dots=[].slice.call(dotsEl.children);
 
-  var renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});
+  var renderer=new THREE.WebGLRenderer({antialias:true,alpha:false});
   renderer.setPixelRatio(Math.min(devicePixelRatio,2));
   renderer.outputEncoding=THREE.sRGBEncoding;
   renderer.shadowMap.enabled=true;
-  renderer.setClearColor(0x000000,0);
+  renderer.setClearColor(0xf3efe8,1);
   stage.appendChild(renderer.domElement);
 
   var scene=new THREE.Scene();
   var cam=new THREE.PerspectiveCamera(30,1,0.1,100);
-  scene.add(new THREE.HemisphereLight(0xffffff,0xd9d4cc,0.9));
-  var key=new THREE.DirectionalLight(0xfff4e6,1.6); key.position.set(-4,9,6); key.castShadow=true;
-  key.shadow.mapSize.set(2048,2048); key.shadow.camera.left=-6; key.shadow.camera.right=6; key.shadow.camera.top=6; key.shadow.camera.bottom=-6;
+  scene.add(new THREE.HemisphereLight(0xffffff,0xd9d4cc,1.0));
+  var key=new THREE.DirectionalLight(0xfff1dd,1.5); key.position.set(-4,9,6); key.castShadow=true;
+  key.shadow.mapSize.set(2048,2048); key.shadow.camera.left=-7; key.shadow.camera.right=7; key.shadow.camera.top=7; key.shadow.camera.bottom=-7;
   scene.add(key);
-  var fill=new THREE.DirectionalLight(0xffffff,0.5); fill.position.set(5,4,5); scene.add(fill);
+  var fill=new THREE.DirectionalLight(0xffffff,0.45); fill.position.set(5,4,5); scene.add(fill);
 
   function mat(c,extra){return new THREE.MeshStandardMaterial(Object.assign({color:c,roughness:0.6,metalness:0.1},extra||{}));}
+  function box(w,h,d,c,x,y,z,parent,extra){
+    var m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat(c,extra));
+    m.position.set(x,y,z); m.castShadow=true; m.receiveShadow=true;
+    (parent||scene).add(m); return m;
+  }
 
-  /* office floor: a soft warm grey that takes the shadows */
-  var floor=new THREE.Mesh(new THREE.CircleGeometry(7,96),mat(0xe9e6e1,{roughness:0.95}));
+  /* room: warm floor, warm back wall, navy skirting line, a rug under the table */
+  var floor=new THREE.Mesh(new THREE.PlaneGeometry(16,12),mat(0xe6dcd0,{roughness:0.9}));
   floor.rotation.x=-Math.PI/2; floor.receiveShadow=true; scene.add(floor);
+  var wall=new THREE.Mesh(new THREE.PlaneGeometry(16,7),mat(0xf6f1ea,{roughness:0.95}));
+  wall.position.set(0,3.5,-4.5); wall.receiveShadow=true; scene.add(wall);
+  box(16,0.35,0.06,0x1a1a2e,0,0.18,-4.47);
+  var rug=new THREE.Mesh(new THREE.CircleGeometry(3.4,96),mat(0xf2d7d4,{roughness:1}));
+  rug.rotation.x=-Math.PI/2; rug.position.y=0.005; rug.receiveShadow=true; scene.add(rug);
+
+  /* window with moving clouds, a navy frame and a muntin cross */
+  var winCanvas=document.createElement('canvas'); winCanvas.width=512; winCanvas.height=340;
+  var wctx=winCanvas.getContext('2d');
+  var winTex=new THREE.CanvasTexture(winCanvas);
+  var win=new THREE.Mesh(new THREE.PlaneGeometry(3.4,2.3),new THREE.MeshBasicMaterial({map:winTex}));
+  win.position.set(-2.4,2.7,-4.44); scene.add(win);
+  box(3.6,0.1,0.08,0x1a1a2e,-2.4,4.0,-4.43);
+  box(3.6,0.1,0.08,0x1a1a2e,-2.4,1.4,-4.43);
+  box(0.1,2.7,0.08,0x1a1a2e,-4.2,2.7,-4.43);
+  box(0.1,2.7,0.08,0x1a1a2e,-0.6,2.7,-4.43);
+  box(0.08,2.3,0.06,0x1a1a2e,-2.4,2.7,-4.43);
+
+  /* shelf with books on the right wall */
+  box(2.4,0.08,0.4,0x1a1a2e,3.2,2.4,-4.2);
+  var bookCols=[0xff5a5f,0xffd60a,0x00c2ba,0x1a1a2e,0xf6f1ea,0x1e8c45];
+  bookCols.forEach(function(c,i){ box(0.16,0.42,0.3,c,2.2+i*0.2,2.65,-4.2); });
+
+  /* plant in a yellow pot, and a floor lamp with a coral shade */
+  var pot=new THREE.Mesh(new THREE.CylinderGeometry(0.32,0.26,0.6,32),mat(0xffd60a,{roughness:0.5}));
+  pot.position.set(-4.0,0.3,-2.8); pot.castShadow=true; scene.add(pot);
+  var leafCols=[0x1e8c45,0x2fa35a,0x1e8c45];
+  [[0,1.05,0,0.55],[0.25,1.5,0.1,0.42],[-0.25,1.45,-0.1,0.4]].forEach(function(l,i){
+    var leaf=new THREE.Mesh(new THREE.IcosahedronGeometry(l[3],1),mat(leafCols[i]));
+    leaf.position.set(-4.0+l[0],l[1],-2.8+l[2]); leaf.castShadow=true; scene.add(leaf);
+  });
+  box(0.05,2.2,0.05,0x1a1a2e,4.2,1.1,-2.4);
+  var shade=new THREE.Mesh(new THREE.CylinderGeometry(0.32,0.5,0.4,32,1,true),mat(0xff5a5f,{side:THREE.DoubleSide,roughness:0.7}));
+  shade.position.set(4.2,2.3,-2.4); shade.castShadow=true; scene.add(shade);
+  box(0.5,0.05,0.5,0x1a1a2e,4.2,0.03,-2.4);
 
   /* the round table: white top, navy base */
   var table=new THREE.Group(); scene.add(table);
@@ -77,7 +117,7 @@ html,body{margin:0;background:#f5f5f5;color:#1a1a2e;font-family:'IBM Plex Mono',
   var pedestal=new THREE.Mesh(new THREE.CylinderGeometry(0.12,0.3,0.72,48),mat(0x1a1a2e,{roughness:0.5}));
   pedestal.position.y=0.36; pedestal.castShadow=true; table.add(pedestal);
 
-  /* hologram: the presenter's text, floating above the front monitor */
+  /* hologram: the same translucent teal glass panel as the hero */
   var holoCanvas=document.createElement('canvas'); holoCanvas.width=1024; holoCanvas.height=576;
   var hctx=holoCanvas.getContext('2d');
   var holoTex=new THREE.CanvasTexture(holoCanvas);
@@ -87,13 +127,19 @@ html,body{margin:0;background:#f5f5f5;color:#1a1a2e;font-family:'IBM Plex Mono',
   function drawHolo(s){
     var ctx=hctx, W=holoCanvas.width, Hh=holoCanvas.height;
     ctx.clearRect(0,0,W,Hh);
-    ctx.fillStyle='rgba(26,26,46,0.94)'; ctx.fillRect(0,0,W,Hh);
-    ctx.strokeStyle='rgba('+s.css+',0.9)'; ctx.lineWidth=6; ctx.strokeRect(8,8,W-16,Hh-16);
-    ctx.fillStyle='rgb('+s.kick+')'; ctx.font='500 30px "IBM Plex Mono", monospace';
+    var g=ctx.createLinearGradient(0,0,0,Hh);
+    g.addColorStop(0,'rgba(0,194,186,0.14)'); g.addColorStop(1,'rgba(8,28,50,0.42)');
+    ctx.fillStyle=g; ctx.fillRect(0,0,W,Hh);
+    ctx.fillStyle='rgba(255,255,255,0.035)';
+    for(var y=0;y<Hh;y+=4){ ctx.fillRect(0,y,W,1); }
+    ctx.shadowColor='rgba(0,194,186,0.45)'; ctx.shadowBlur=30;
+    ctx.strokeStyle='rgba(0,194,186,0.6)'; ctx.lineWidth=4; ctx.strokeRect(10,10,W-20,Hh-20);
+    ctx.shadowBlur=0;
+    ctx.fillStyle='#00c2ba'; ctx.font='500 30px "IBM Plex Mono", monospace';
     ctx.fillText(s.kickName.toUpperCase(),60,110);
-    ctx.fillStyle='#ffffff'; ctx.font='800 64px "Unbounded", sans-serif';
+    ctx.fillStyle='#f4f7fb'; ctx.font='800 64px "Unbounded", sans-serif';
     wrap(s.head,60,190,W-120,74);
-    ctx.fillStyle='rgba(255,255,255,0.78)'; ctx.font='400 32px "IBM Plex Mono", monospace';
+    ctx.fillStyle='#9fb3d1'; ctx.font='400 32px "IBM Plex Mono", monospace';
     wrap(s.body,60,400,W-120,44);
     holoTex.needsUpdate=true;
   }
@@ -107,26 +153,24 @@ html,body{margin:0;background:#f5f5f5;color:#1a1a2e;font-family:'IBM Plex Mono',
     hctx.fillText(line,x,y);
   }
 
-  /* each station: a monitor on the table, a chair, and a mascot standing behind the chair */
+  /* each station: one screen on the table, a chair, and a mascot */
   var stations=[];
   SECTIONS.forEach(function(s,i){
     var theta=i*Math.PI*2/N;
     var sin=Math.sin(theta), cos=Math.cos(theta);
-    var st={theta:theta,mascot:new THREE.Group(),lean:null,chair:null,monitor:new THREE.Group(),screenMat:null,mascotR:RM,chairR:RC,leanAmt:0};
+    var st={theta:theta,mascot:new THREE.Group(),lean:null,chair:null,monitor:new THREE.Group(),mascotR:RM,chairR:RC,leanAmt:0};
 
-    /* monitor on the table, screen facing its own seat */
+    /* a single screen on a short stand: only the front is visible */
     st.monitor.position.set(RMO*sin,0.79,RMO*cos);
     st.monitor.rotation.y=theta+Math.PI;
-    var body=new THREE.Mesh(new THREE.BoxGeometry(0.62,0.42,0.04),mat(0x1a1a2e,{roughness:0.5}));
-    body.position.set(0,0.42,0); body.castShadow=true; st.monitor.add(body);
-    st.screenMat=new THREE.MeshBasicMaterial({color:s.hex});
-    var screen=new THREE.Mesh(new THREE.PlaneGeometry(0.56,0.34),st.screenMat);
-    screen.position.set(0,0.42,0.03); st.monitor.add(screen);
-    var stand=new THREE.Mesh(new THREE.BoxGeometry(0.06,0.2,0.04),mat(0x1a1a2e));
-    stand.position.set(0,0.1,0); st.monitor.add(stand);
+    var stand=new THREE.Mesh(new THREE.BoxGeometry(0.06,0.3,0.04),mat(0x1a1a2e));
+    stand.position.set(0,0.15,0); stand.castShadow=true; st.monitor.add(stand);
+    st.screenMat=new THREE.MeshBasicMaterial({color:s.hex,side:THREE.FrontSide});
+    var screen=new THREE.Mesh(new THREE.PlaneGeometry(0.56,0.36),st.screenMat);
+    screen.position.set(0,0.44,0); st.monitor.add(screen);
     table.add(st.monitor);
 
-    /* chair in front of the mascot, between the table and the mascot */
+    /* chair between the table and the mascot */
     var chair=new THREE.Group(); chair.position.set(RC*sin,0,RC*cos); chair.rotation.y=theta+Math.PI; table.add(chair); st.chair=chair;
     var seat=new THREE.Mesh(new THREE.CylinderGeometry(0.26,0.26,0.07,40),mat(0x2d2d2d,{roughness:0.7}));
     seat.position.y=0.5; seat.castShadow=true; chair.add(seat);
@@ -135,11 +179,10 @@ html,body{margin:0;background:#f5f5f5;color:#1a1a2e;font-family:'IBM Plex Mono',
     var leg=new THREE.Mesh(new THREE.CylinderGeometry(0.03,0.03,0.48,12),mat(0x888888,{metalness:0.6}));
     leg.position.y=0.26; chair.add(leg);
 
-    /* the mascot stands behind the chair, facing the table */
+    /* the mascot: st.mascot is positioned and turned, st.lean tips it back when presenting */
     st.mascot.position.set(RM*sin,0,RM*cos);
     st.mascot.rotation.y=theta+Math.PI;
     table.add(st.mascot);
-    /* the lean group tips the whole mascot sideways when it presents */
     st.lean=new THREE.Group(); st.mascot.add(st.lean);
     var bin=null; try{bin=atob(window[s.model]);}catch(e){bin=null;}
     if(bin){
@@ -149,12 +192,12 @@ html,body{margin:0;background:#f5f5f5;color:#1a1a2e;font-family:'IBM Plex Mono',
         var m=gltf.scene;
         m.rotation.y=-Math.PI/2;
         m.updateMatrixWorld(true);
-        var box=new THREE.Box3().setFromObject(m);
-        m.scale.setScalar(H/box.getSize(new THREE.Vector3()).y);
+        var bb=new THREE.Box3().setFromObject(m);
+        m.scale.setScalar(H/bb.getSize(new THREE.Vector3()).y);
         m.updateMatrixWorld(true);
-        box=new THREE.Box3().setFromObject(m);
-        var cen=box.getCenter(new THREE.Vector3());
-        m.position.set(-cen.x,-box.min.y,-cen.z);
+        bb=new THREE.Box3().setFromObject(m);
+        var cen=bb.getCenter(new THREE.Vector3());
+        m.position.set(-cen.x,-bb.min.y,-cen.z);
         m.traverse(function(o){ if(o.isMesh){ o.castShadow=true; o.receiveShadow=true; } });
         st.lean.add(m);
       },function(){});
@@ -167,19 +210,36 @@ html,body{margin:0;background:#f5f5f5;color:#1a1a2e;font-family:'IBM Plex Mono',
     var w=innerWidth,h=innerHeight;
     renderer.setSize(w,h,false);
     cam.aspect=w/h;
-    if(w<700){ cam.fov=46; cam.position.set(0,3.8,12); cam.lookAt(0,1.2,0); }
-    else { cam.fov=30; cam.position.set(0,3.4,11); cam.lookAt(0,1.2,0); }
+    if(w<700){ cam.fov=46; cam.position.set(0,3.8,12); cam.lookAt(0,1.4,0); }
+    else { cam.fov=30; cam.position.set(0,3.2,11); cam.lookAt(0,1.5,0); }
     cam.updateProjectionMatrix();
   }
   layout();
   addEventListener('resize',layout);
+
+  /* clouds drift across the window */
+  var clouds=[{x:0.1,y:0.3,s:1},{x:0.5,y:0.2,s:0.7},{x:0.8,y:0.42,s:1.2}];
+  function drawWindow(t){
+    var ctx=wctx, W=winCanvas.width, Hh=winCanvas.height;
+    var sky=ctx.createLinearGradient(0,0,0,Hh);
+    sky.addColorStop(0,'#9fdcea'); sky.addColorStop(1,'#eaf8fb');
+    ctx.fillStyle=sky; ctx.fillRect(0,0,W,Hh);
+    ctx.fillStyle='#ffffff';
+    clouds.forEach(function(c){
+      var x=((c.x*W + t*18*c.s) % (W+220)) - 110;
+      var y=c.y*Hh, r=38*c.s;
+      ctx.beginPath(); ctx.ellipse(x,y,r*2.2,r,0,0,Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(x+r*1.1,y-r*0.4,r*1.6,r*1.1,0,0,Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(x-r*1.0,y-r*0.1,r*1.3,r*0.9,0,0,Math.PI*2); ctx.fill();
+    });
+    winTex.needsUpdate=true;
+  }
 
   function progress(){
     var r=track.getBoundingClientRect();
     var total=track.offsetHeight-innerHeight;
     return Math.min(1,Math.max(0,-r.top/total));
   }
-
   var rot=0;
   var reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
   function turn(current,goal,speed){
@@ -188,6 +248,8 @@ html,body{margin:0;background:#f5f5f5;color:#1a1a2e;font-family:'IBM Plex Mono',
     return current+d*speed;
   }
   function frame(now){
+    var t=reduce?0:now/1000;
+    drawWindow(t);
     var p=progress();
     var idx=Math.min(N-1,Math.floor(p*N));
     /* the table turns so the presenter's seat is at the front */
@@ -201,22 +263,22 @@ html,body{margin:0;background:#f5f5f5;color:#1a1a2e;font-family:'IBM Plex Mono',
     }
     holoOpacity+=(1-holoOpacity)*0.08;
     holo.material.opacity=holoOpacity*0.95;
+    holo.position.y=2.75+(reduce?0:Math.sin(t*1.2)*0.04);
 
     stations.forEach(function(st,i){
       var presenting=(i===idx);
-      /* the presenter's mascot turns to the camera and its monitor faces out */
-      var mascotGoal=presenting?st.theta:st.theta+Math.PI;
-      st.mascot.rotation.y=turn(st.mascot.rotation.y,mascotGoal,0.08);
-      /* the presenter moves from its chair onto the table edge, the chair slides away to make room */
-      st.mascotR+=((presenting?RT+0.05:RM)-st.mascotR)*0.06;
+      /* the presenter turns to the camera; the others face their screens */
+      var goal=presenting?st.theta:st.theta+Math.PI;
+      st.mascot.rotation.y=turn(st.mascot.rotation.y,goal,0.08);
+      st.monitor.rotation.y=turn(st.monitor.rotation.y,goal,0.08);
+      /* the presenter moves onto the table edge and the chair slides away */
+      st.mascotR+=((presenting?RT+0.3:RM)-st.mascotR)*0.06;
       st.chairR+=((presenting?RC+0.9:RC)-st.chairR)*0.06;
       st.mascot.position.set(st.mascotR*Math.sin(st.theta),0,st.mascotR*Math.cos(st.theta));
       st.chair.position.set(st.chairR*Math.sin(st.theta),0,st.chairR*Math.cos(st.theta));
-      st.leanAmt+=((presenting?0.3:0)-st.leanAmt)*0.08;
-      st.lean.rotation.z=st.leanAmt;
-      var monitorGoal=presenting?st.theta:st.theta+Math.PI;
-      st.monitor.rotation.y=turn(st.monitor.rotation.y,monitorGoal,0.08);
-      st.screenMat.opacity=1;
+      /* the presenter leans back onto the table rim */
+      st.leanAmt+=((presenting?-0.32:0)-st.leanAmt)*0.08;
+      st.lean.rotation.x=st.leanAmt;
     });
 
     renderer.render(scene,cam);
