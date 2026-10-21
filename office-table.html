@@ -128,7 +128,8 @@ html,body{margin:0;background:#f5f5f5;color:#1a1a2e;font-family:'IBM Plex Mono',
     var ctx=hctx, W=holoCanvas.width, Hh=holoCanvas.height;
     ctx.clearRect(0,0,W,Hh);
     var g=ctx.createLinearGradient(0,0,0,Hh);
-    g.addColorStop(0,'rgba(0,194,186,0.14)'); g.addColorStop(1,'rgba(8,28,50,0.42)');
+    /* the hero's glass panel, a little denser so the text reads over the bright room */
+    g.addColorStop(0,'rgba(0,194,186,0.22)'); g.addColorStop(1,'rgba(8,28,50,0.84)');
     ctx.fillStyle=g; ctx.fillRect(0,0,W,Hh);
     ctx.fillStyle='rgba(255,255,255,0.035)';
     for(var y=0;y<Hh;y+=4){ ctx.fillRect(0,y,W,1); }
@@ -271,11 +272,11 @@ html,body{margin:0;background:#f5f5f5;color:#1a1a2e;font-family:'IBM Plex Mono',
       var goal=presenting?st.theta:st.theta+Math.PI;
       st.mascot.rotation.y=turn(st.mascot.rotation.y,goal,0.08);
       st.monitor.rotation.y=turn(st.monitor.rotation.y,goal,0.08);
-      /* the presenter moves onto the table edge and the chair slides away */
+      /* the presenter moves onto the table edge */
       st.mascotR+=((presenting?RT+0.3:RM)-st.mascotR)*0.06;
-      st.chairR+=((presenting?RC+0.9:RC)-st.chairR)*0.06;
+      /* a presenter stands up to lean, so the chair is hidden while they present */
+      st.chair.visible=!presenting;
       st.mascot.position.set(st.mascotR*Math.sin(st.theta),0,st.mascotR*Math.cos(st.theta));
-      st.chair.position.set(st.chairR*Math.sin(st.theta),0,st.chairR*Math.cos(st.theta));
       /* the presenter leans back onto the table rim */
       st.leanAmt+=((presenting?-0.32:0)-st.leanAmt)*0.08;
       st.lean.rotation.x=st.leanAmt;
