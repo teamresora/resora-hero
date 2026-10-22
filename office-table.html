@@ -161,22 +161,15 @@ html,body{margin:0;background:#050d1f;color:#f4f7fb;font-family:'IBM Plex Mono',
       var c=bb.getCenter(new THREE.Vector3());
       mm.position.set(-c.x,-bb.min.y,-c.z);
       st.monitor.add(mm);
-      /* the screen is the largest flat mesh; it takes this presenter's accent colour */
-      var best=null, bestArea=0;
-      mm.updateMatrixWorld(true);
+      /* the generated monitor is a single mesh, so the whole device takes a dark navy body with this presenter's accent glow */
       mm.traverse(function(o){
         if(!o.isMesh) return;
-        var sz=new THREE.Box3().setFromObject(o).getSize(new THREE.Vector3());
-        var area=sz.x*sz.y;
-        if(sz.z<0.05*Math.max(sz.x,sz.y) && area>bestArea){ bestArea=area; best=o; }
+        o.material=o.material.clone();
+        o.material.color.setHex(0x1a1a2e);
+        o.material.emissive.setHex(s.accent);
+        o.material.emissiveIntensity=0.15;
+        st.screen=o;
       });
-      if(best){
-        best.material=best.material.clone();
-        best.material.color.setHex(s.accent);
-        best.material.emissive.setHex(s.accent);
-        best.material.emissiveIntensity=0.15;
-        st.screen=best;
-      }
     });
     table.add(st.monitor);
 
