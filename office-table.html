@@ -167,7 +167,7 @@ html,body{margin:0;background:#050d1f;color:#f4f7fb;font-family:'IBM Plex Mono',
         o.material=o.material.clone();
         o.material.color.setHex(0x1a1a2e);
         o.material.emissive.setHex(s.accent);
-        o.material.emissiveIntensity=0.15;
+        o.material.emissiveIntensity=0.35;
         st.screen=o;
       });
     });
@@ -264,7 +264,7 @@ html,body{margin:0;background:#050d1f;color:#f4f7fb;font-family:'IBM Plex Mono',
       st.mascot.position.set(st.mascotR*Math.sin(st.theta),0,st.mascotR*Math.cos(st.theta));
       st.chair.visible=!presenting;
       /* the presenter's screen glows in its accent colour */
-      if(st.screen){ st.screen.material.emissiveIntensity+=((presenting?0.9:0.15)-st.screen.material.emissiveIntensity)*0.1; }
+      if(st.screen){ st.screen.material.emissiveIntensity+=((presenting?1.6:0.35)-st.screen.material.emissiveIntensity)*0.1; }
       /* the presenter leans back onto the table rim */
       st.leanAmt+=((presenting?-0.32:0)-st.leanAmt)*0.08;
       st.lean.rotation.x=st.leanAmt;
