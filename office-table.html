@@ -32,6 +32,8 @@ html,body{margin:0;background:#f5f5f5;color:#1a1a2e;font-family:'IBM Plex Mono',
 </div>
 <script>
 (function(){
+  /* generated monitor model (Higgsfield), reused for all five seats */
+  var MONITOR_URL='https://d8j0ntlcm91z4.cloudfront.net/user_3KzVNtQUgS3qMwaWQOuaLGRRgS5/hf_20261021_235902_d587463f-fabd-4b6a-af31-6a2e4dd559f0.glb';
   /* the five presenters, in order. hex: monitor screen colour. */
   var SECTIONS=[
     {model:'MB_TEAL',  hex:0x00c2ba, kickName:'The problem',  head:'Your Filipino team member may be an employee.', body:'If they work set hours and follow your direction, courts may treat them as your employee.'},
@@ -51,7 +53,7 @@ html,body{margin:0;background:#f5f5f5;color:#1a1a2e;font-family:'IBM Plex Mono',
   renderer.setPixelRatio(Math.min(devicePixelRatio,2));
   renderer.outputEncoding=THREE.sRGBEncoding;
   renderer.shadowMap.enabled=true;
-  renderer.setClearColor(0xf3efe8,1);
+  renderer.setClearColor(0x1a1a2e,1);
   stage.appendChild(renderer.domElement);
 
   var scene=new THREE.Scene();
@@ -70,12 +72,12 @@ html,body{margin:0;background:#f5f5f5;color:#1a1a2e;font-family:'IBM Plex Mono',
   }
 
   /* room: warm floor, warm back wall, navy skirting line, a rug under the table */
-  var floor=new THREE.Mesh(new THREE.PlaneGeometry(16,12),mat(0xe6dcd0,{roughness:0.9}));
+  var floor=new THREE.Mesh(new THREE.PlaneGeometry(16,12),mat(0xc9a77c,{roughness:0.85}));
   floor.rotation.x=-Math.PI/2; floor.receiveShadow=true; scene.add(floor);
-  var wall=new THREE.Mesh(new THREE.PlaneGeometry(16,7),mat(0xf6f1ea,{roughness:0.95}));
+  var wall=new THREE.Mesh(new THREE.PlaneGeometry(16,7),mat(0x1a1a2e,{roughness:0.95}));
   wall.position.set(0,3.5,-4.5); wall.receiveShadow=true; scene.add(wall);
-  box(16,0.35,0.06,0x1a1a2e,0,0.18,-4.47);
-  var rug=new THREE.Mesh(new THREE.CircleGeometry(3.4,96),mat(0xf2d7d4,{roughness:1}));
+  box(16,0.35,0.06,0xffd60a,0,0.18,-4.47);
+  var rug=new THREE.Mesh(new THREE.CircleGeometry(3.4,96),mat(0xe84a50,{roughness:1}));
   rug.rotation.x=-Math.PI/2; rug.position.y=0.005; rug.receiveShadow=true; scene.add(rug);
 
   /* window with moving clouds, a navy frame and a muntin cross */
@@ -84,14 +86,14 @@ html,body{margin:0;background:#f5f5f5;color:#1a1a2e;font-family:'IBM Plex Mono',
   var winTex=new THREE.CanvasTexture(winCanvas);
   var win=new THREE.Mesh(new THREE.PlaneGeometry(3.4,2.3),new THREE.MeshBasicMaterial({map:winTex}));
   win.position.set(-2.4,2.7,-4.44); scene.add(win);
-  box(3.6,0.1,0.08,0x1a1a2e,-2.4,4.0,-4.43);
-  box(3.6,0.1,0.08,0x1a1a2e,-2.4,1.4,-4.43);
-  box(0.1,2.7,0.08,0x1a1a2e,-4.2,2.7,-4.43);
-  box(0.1,2.7,0.08,0x1a1a2e,-0.6,2.7,-4.43);
-  box(0.08,2.3,0.06,0x1a1a2e,-2.4,2.7,-4.43);
+  box(3.6,0.1,0.08,0xf6f1ea,-2.4,4.0,-4.43);
+  box(3.6,0.1,0.08,0xf6f1ea,-2.4,1.4,-4.43);
+  box(0.1,2.7,0.08,0xf6f1ea,-4.2,2.7,-4.43);
+  box(0.1,2.7,0.08,0xf6f1ea,-0.6,2.7,-4.43);
+  box(0.08,2.3,0.06,0xf6f1ea,-2.4,2.7,-4.43);
 
   /* shelf with books on the right wall */
-  box(2.4,0.08,0.4,0x1a1a2e,3.2,2.4,-4.2);
+  box(2.4,0.08,0.4,0xf6f1ea,3.2,2.4,-4.2);
   var bookCols=[0xff5a5f,0xffd60a,0x00c2ba,0x1a1a2e,0xf6f1ea,0x1e8c45];
   bookCols.forEach(function(c,i){ box(0.16,0.42,0.3,c,2.2+i*0.2,2.65,-4.2); });
 
@@ -103,16 +105,16 @@ html,body{margin:0;background:#f5f5f5;color:#1a1a2e;font-family:'IBM Plex Mono',
     var leaf=new THREE.Mesh(new THREE.IcosahedronGeometry(l[3],1),mat(leafCols[i]));
     leaf.position.set(-4.0+l[0],l[1],-2.8+l[2]); leaf.castShadow=true; scene.add(leaf);
   });
-  box(0.05,2.2,0.05,0x1a1a2e,4.2,1.1,-2.4);
+  box(0.05,2.2,0.05,0xf6f1ea,4.2,1.1,-2.4);
   var shade=new THREE.Mesh(new THREE.CylinderGeometry(0.32,0.5,0.4,32,1,true),mat(0xff5a5f,{side:THREE.DoubleSide,roughness:0.7}));
   shade.position.set(4.2,2.3,-2.4); shade.castShadow=true; scene.add(shade);
-  box(0.5,0.05,0.5,0x1a1a2e,4.2,0.03,-2.4);
+  box(0.5,0.05,0.5,0xf6f1ea,4.2,0.03,-2.4);
 
   /* the round table: white top, navy base */
   var table=new THREE.Group(); scene.add(table);
-  var top=new THREE.Mesh(new THREE.CylinderGeometry(RT,RT,0.08,96),mat(0xffffff,{roughness:0.4}));
+  var top=new THREE.Mesh(new THREE.CylinderGeometry(RT,RT,0.08,96),mat(0x3a3a5c,{roughness:0.4}));
   top.position.y=0.75; top.castShadow=true; top.receiveShadow=true; table.add(top);
-  var trim=new THREE.Mesh(new THREE.TorusGeometry(RT,0.025,12,128),mat(0x1a1a2e,{roughness:0.5}));
+  var trim=new THREE.Mesh(new THREE.TorusGeometry(RT,0.025,12,128),mat(0xffd60a,{roughness:0.5}));
   trim.rotation.x=Math.PI/2; trim.position.y=0.79; table.add(trim);
   var pedestal=new THREE.Mesh(new THREE.CylinderGeometry(0.12,0.3,0.72,48),mat(0x1a1a2e,{roughness:0.5}));
   pedestal.position.y=0.36; pedestal.castShadow=true; table.add(pedestal);
@@ -164,11 +166,19 @@ html,body{margin:0;background:#f5f5f5;color:#1a1a2e;font-family:'IBM Plex Mono',
     /* a single screen on a short stand: only the front is visible */
     st.monitor.position.set(RMO*sin,0.79,RMO*cos);
     st.monitor.rotation.y=theta+Math.PI;
-    var stand=new THREE.Mesh(new THREE.BoxGeometry(0.06,0.3,0.04),mat(0x1a1a2e));
-    stand.position.set(0,0.15,0); stand.castShadow=true; st.monitor.add(stand);
-    st.screenMat=new THREE.MeshBasicMaterial({color:s.hex,side:THREE.FrontSide});
-    var screen=new THREE.Mesh(new THREE.PlaneGeometry(0.56,0.36),st.screenMat);
-    screen.position.set(0,0.44,0); st.monitor.add(screen);
+    /* a generated 3D monitor model, scaled to a desk monitor's height */
+    new THREE.GLTFLoader().load(MONITOR_URL,function(gltf){
+      var mm=gltf.scene;
+      mm.traverse(function(o){ if(o.isMesh){ o.castShadow=true; o.receiveShadow=true; } });
+      var bb=new THREE.Box3().setFromObject(mm);
+      mm.scale.setScalar(0.5/bb.getSize(new THREE.Vector3()).y);
+      mm.updateMatrixWorld(true);
+      bb=new THREE.Box3().setFromObject(mm);
+      var c=bb.getCenter(new THREE.Vector3());
+      mm.position.set(-c.x,-bb.min.y,-c.z);
+      st.monitor.add(mm);
+    });
+    st.screenMat=new THREE.MeshBasicMaterial({color:s.hex});
     table.add(st.monitor);
 
     /* chair between the table and the mascot */
