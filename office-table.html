@@ -96,7 +96,7 @@ html,body{margin:0;background:#050d1f;color:#f4f7fb;font-family:'IBM Plex Mono',
   ring.rotation.x=-Math.PI/2; ring.position.y=0.003; scene.add(ring);
 
   /* the round table: dark navy top, a navy pedestal, and a rim in the presenter's accent colour */
-  var table=new THREE.Group(); scene.add(table);
+  var table=new THREE.Group(); table.scale.setScalar(1.15); scene.add(table);
   var top=new THREE.Mesh(new THREE.CylinderGeometry(RT,RT,0.08,96),mat(0x1a1a2e,{roughness:0.35,metalness:0.5}));
   top.position.y=0.75; top.castShadow=true; top.receiveShadow=true; table.add(top);
   var trimMat=mat(0x00c2ba,{emissive:0x00c2ba,emissiveIntensity:0.5});
@@ -161,6 +161,22 @@ html,body{margin:0;background:#050d1f;color:#f4f7fb;font-family:'IBM Plex Mono',
       var c=bb.getCenter(new THREE.Vector3());
       mm.position.set(-c.x,-bb.min.y,-c.z);
       st.monitor.add(mm);
+      /* the screen is the largest flat mesh; it takes this presenter's accent colour */
+      var best=null, bestArea=0;
+      mm.updateMatrixWorld(true);
+      mm.traverse(function(o){
+        if(!o.isMesh) return;
+        var sz=new THREE.Box3().setFromObject(o).getSize(new THREE.Vector3());
+        var area=sz.x*sz.y;
+        if(sz.z<0.05*Math.max(sz.x,sz.y) && area>bestArea){ bestArea=area; best=o; }
+      });
+      if(best){
+        best.material=best.material.clone();
+        best.material.color.setHex(s.accent);
+        best.material.emissive.setHex(s.accent);
+        best.material.emissiveIntensity=0.15;
+        st.screen=best;
+      }
     });
     table.add(st.monitor);
 
@@ -254,6 +270,8 @@ html,body{margin:0;background:#050d1f;color:#f4f7fb;font-family:'IBM Plex Mono',
       st.mascotR+=((presenting?RT+0.3:RM)-st.mascotR)*0.06;
       st.mascot.position.set(st.mascotR*Math.sin(st.theta),0,st.mascotR*Math.cos(st.theta));
       st.chair.visible=!presenting;
+      /* the presenter's screen glows in its accent colour */
+      if(st.screen){ st.screen.material.emissiveIntensity+=((presenting?0.9:0.15)-st.screen.material.emissiveIntensity)*0.1; }
       /* the presenter leans back onto the table rim */
       st.leanAmt+=((presenting?-0.32:0)-st.leanAmt)*0.08;
       st.lean.rotation.x=st.leanAmt;
