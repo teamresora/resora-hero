@@ -227,6 +227,18 @@ html,body{margin:0;background:#050d1f;color:#f4f7fb;font-family:'IBM Plex Mono',
     var total=track.offsetHeight-innerHeight;
     return Math.min(1,Math.max(0,-r.top/total));
   }
+  /* the section copy is edited in Webflow and sent here by message, so the text stays editable */
+  var RZ_ORIGINS=['https://resora.com.au','https://www.resora.com.au','https://resora.ph','https://www.resora.ph','https://resora-ad05e1.design.webflow.com'];
+  addEventListener('message',function(e){
+    if(RZ_ORIGINS.indexOf(e.origin)<0 || !e.data || !e.data.rzCopy) return;
+    e.data.rzCopy.forEach(function(c,i){
+      if(!SECTIONS[i]) return;
+      if(c.kick) SECTIONS[i].kickName=c.kick;
+      if(c.head) SECTIONS[i].head=c.head;
+      if(c.body) SECTIONS[i].body=c.body;
+    });
+    active=-1;
+  });
   var rot=0;
   var reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
   function turn(current,goal,speed){
