@@ -45,7 +45,7 @@ html,body{margin:0;background:#050d1f;color:#f4f7fb;font-family:'IBM Plex Mono',
     {url:'https://d8j0ntlcm91z4.cloudfront.net/user_3KzVNtQUgS3qMwaWQOuaLGRRgS5/hf_20261023_075942_9eff99a7-8f0f-4de2-b8d0-c6198ef10a04.glb', accent:0x6f7fb8, seat:0x2d2d4e, css:'111,127,184', kickName:'Pricing',      head:'No salary markup. No setup fee.', body:'Recruitment from $4,750, then management from $200 a month per team member.'},
     {url:'https://d8j0ntlcm91z4.cloudfront.net/user_3KzVNtQUgS3qMwaWQOuaLGRRgS5/hf_20261023_075945_0b0203d9-e900-4024-857c-21cf77fbf7f7.glb', accent:0xf6f1ea, seat:0xf6f1ea, css:'246,241,234', kickName:'Compliance',   head:'Fully compliant with Australian law.', body:'Fair Work protected. Payroll, super and leave handled for you, every pay run.'}
   ];
-  var N=SECTIONS.length, RT=1.5, RM=2.8, RC=2.35, RMO=0.95, H=1.4;
+  var N=SECTIONS.length, RT=1.5, RM=1.95, RC=2.35, RMO=1.2, H=1.4;
   var track=document.getElementById('track');
   var stage=document.getElementById('stage');
   var dotsEl=document.getElementById('dots');
@@ -61,8 +61,8 @@ html,body{margin:0;background:#050d1f;color:#f4f7fb;font-family:'IBM Plex Mono',
 
   var scene=new THREE.Scene();
   var cam=new THREE.PerspectiveCamera(30,1,0.1,100);
-  scene.add(new THREE.HemisphereLight(0x6f8fd0,0x03070f,0.45));
-  var key=new THREE.SpotLight(0xffe2b0,2.4,22,Math.PI/5,0.8,1.4);
+  scene.add(new THREE.HemisphereLight(0x9fb8e8,0x0a1428,1.1));
+  var key=new THREE.SpotLight(0xffe2b0,3.2,22,Math.PI/5,0.8,1.4);
   key.position.set(-3,9,6); key.target.position.set(0,0.6,0); key.castShadow=true;
   scene.add(key); scene.add(key.target);
   var rim=new THREE.DirectionalLight(0x4fe6dd,1.2); rim.position.set(4,3,-4); scene.add(rim);
@@ -111,6 +111,12 @@ html,body{margin:0;background:#050d1f;color:#f4f7fb;font-family:'IBM Plex Mono',
   var holoTex=new THREE.CanvasTexture(holoCanvas);
   var holo=new THREE.Mesh(new THREE.PlaneGeometry(3.2,1.8),new THREE.MeshBasicMaterial({map:holoTex,transparent:true,opacity:0,depthWrite:false,side:THREE.DoubleSide}));
   holo.position.set(0,2.75,1.0); scene.add(holo);
+  /* a beam from the presenter's monitor up to the hologram, like the hero's beam */
+  var beamGeo=new THREE.BufferGeometry();
+  beamGeo.setAttribute('position',new THREE.Float32BufferAttribute([-0.2,1.3,1.4, 0.2,1.3,1.4, 1.6,1.85,1.0, -1.6,1.85,1.0],3));
+  beamGeo.setIndex([0,1,2, 0,2,3]);
+  var beamMat=new THREE.MeshBasicMaterial({color:0x00c2ba,transparent:true,opacity:0.22,depthWrite:false,side:THREE.DoubleSide});
+  scene.add(new THREE.Mesh(beamGeo,beamMat));
   var active=-1, holoOpacity=0;
   function drawHolo(s){
     var ctx=hctx, W=holoCanvas.width, Hh=holoCanvas.height;
@@ -238,6 +244,7 @@ html,body{margin:0;background:#050d1f;color:#f4f7fb;font-family:'IBM Plex Mono',
     /* the presenter's rim takes its accent colour */
     trimMat.color.setHex(SECTIONS[idx].accent);
     trimMat.emissive.setHex(SECTIONS[idx].accent);
+    beamMat.color.setHex(SECTIONS[idx].accent);
     globe.rotation.y=reduce?0:t*0.03;
 
     if(idx!==active){
@@ -256,7 +263,7 @@ html,body{margin:0;background:#050d1f;color:#f4f7fb;font-family:'IBM Plex Mono',
       st.mascot.rotation.y=turn(st.mascot.rotation.y,goal,0.08);
       st.monitor.rotation.y=turn(st.monitor.rotation.y,goal,0.08);
       /* the presenter moves onto the table edge; the chair is hidden while they stand */
-      st.mascotR+=((presenting?RT+0.3:RM)-st.mascotR)*0.06;
+      st.mascotR=RM;
       st.mascot.position.set(st.mascotR*Math.sin(st.theta),0,st.mascotR*Math.cos(st.theta));
       st.chair.visible=false;
       /* the presenter's screen glows in its accent colour */
