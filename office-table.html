@@ -18,12 +18,6 @@ html,body{margin:0;background:#050d1f;color:#f4f7fb;font-family:'IBM Plex Mono',
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
-<script src="data-globe.js"></script>
-<script src="data-teal.js"></script>
-<script src="data-red.js"></script>
-<script src="data-yellow.js"></script>
-<script src="data-navy.js"></script>
-<script src="data-white.js"></script>
 </head>
 <body>
 <div class="track" id="track">
@@ -71,23 +65,18 @@ html,body{margin:0;background:#050d1f;color:#f4f7fb;font-family:'IBM Plex Mono',
 
   /* the hero's globe, dimmed and set back so it sits behind the office like the hero's background */
   var globe=new THREE.Group(); globe.position.set(0,3.4,-8); scene.add(globe);
-  var bin0=null; try{bin0=atob(window.MB_GLOBE);}catch(e){bin0=null;}
-  if(bin0){
-    var gbuf=new Uint8Array(bin0.length);
-    for(var g=0;g<bin0.length;g++){gbuf[g]=bin0.charCodeAt(g);}
-    new THREE.GLTFLoader().parse(gbuf.buffer,'',function(gltf){
-      var gm=gltf.scene;
-      gm.traverse(function(o){ if(o.isMesh&&o.material){ o.material.transparent=true; o.material.opacity=0.42; o.material.depthWrite=false; } });
-      gm.updateMatrixWorld(true);
-      var gb=new THREE.Box3().setFromObject(gm);
-      gm.scale.setScalar(7/gb.getSize(new THREE.Vector3()).y);
-      gm.updateMatrixWorld(true);
-      gb=new THREE.Box3().setFromObject(gm);
-      var gc=gb.getCenter(new THREE.Vector3());
-      gm.position.set(-gc.x,-gc.y,-gc.z);
-      globe.add(gm);
-    },function(){});
-  }
+  new THREE.GLTFLoader().load('https://cdn.prod.website-files.com/6a435801d0e328b4fc80f68e/6adeaeda33da3cd4222046e1_globe-compressed.glb',function(gltf){
+    var gm=gltf.scene;
+    gm.traverse(function(o){ if(o.isMesh&&o.material){ o.material.transparent=true; o.material.opacity=0.42; o.material.depthWrite=false; } });
+    gm.updateMatrixWorld(true);
+    var gb=new THREE.Box3().setFromObject(gm);
+    gm.scale.setScalar(7/gb.getSize(new THREE.Vector3()).y);
+    gm.updateMatrixWorld(true);
+    gb=new THREE.Box3().setFromObject(gm);
+    var gc=gb.getCenter(new THREE.Vector3());
+    gm.position.set(-gc.x,-gc.y,-gc.z);
+    globe.add(gm);
+  },function(){},function(){});
 
   /* a dark floor disc with a faint white ring, no bright surfaces */
   var floor=new THREE.Mesh(new THREE.CircleGeometry(6.5,96),mat(0x0a1630,{roughness:0.9,metalness:0.1}));
