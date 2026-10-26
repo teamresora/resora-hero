@@ -55,7 +55,7 @@ html::-webkit-scrollbar,body::-webkit-scrollbar{display:none;width:0;height:0}
   var dots=[].slice.call(dotsEl.children);
 
   var renderer=new THREE.WebGLRenderer({antialias:true,alpha:false});
-  renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+  renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));
   renderer.outputEncoding=THREE.sRGBEncoding;
   renderer.shadowMap.enabled=true;
   renderer.setClearColor(0x050d1f,1);
@@ -237,13 +237,18 @@ html::-webkit-scrollbar,body::-webkit-scrollbar{display:none;width:0;height:0}
     active=-1;
   });
   /* one scroll or swipe moves exactly one presenter; at either end the scroll passes on to the page */
-  var busy=false;
-  function goTo(i){ busy=true; scrollTo({top:i*innerHeight,behavior:'smooth'}); setTimeout(function(){ busy=false; },900); }
+  var lastStep=0, lastWheel=0, lastDelta=0;
+  function goTo(i){ lastStep=performance.now(); scrollTo({top:i*innerHeight,behavior:'auto'}); }
   addEventListener('wheel',function(e){
     var next=Math.round(scrollY/innerHeight)+(e.deltaY>0?1:-1);
     if(next<0||next>N-1) return;
     e.preventDefault();
-    if(!busy) goTo(next);
+    var now=performance.now(), d=Math.abs(e.deltaY);
+    /* a fading trackpad flick is one gesture; a fresh or stronger wheel tick is a new one */
+    var inertia=(now-lastWheel<120)&&d<=lastDelta;
+    lastWheel=now; lastDelta=d;
+    if(inertia||now-lastStep<260) return;
+    goTo(next);
   },{passive:false});
   var touchY=null;
   addEventListener('touchstart',function(e){ touchY=e.touches[0].clientY; },{passive:true});
@@ -255,7 +260,7 @@ html::-webkit-scrollbar,body::-webkit-scrollbar{display:none;width:0;height:0}
     touchY=null;
     if(next<0||next>N-1) return;
     e.preventDefault();
-    if(!busy) goTo(next);
+    goTo(next);
   },{passive:false});
   var rot=0;
   var reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
