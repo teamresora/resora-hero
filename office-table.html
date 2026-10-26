@@ -7,7 +7,6 @@
 <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 html,body{margin:0;background:#050d1f;color:#f4f7fb;font-family:'IBM Plex Mono',ui-monospace,monospace}
-html{scroll-snap-type:y mandatory}
 .track{height:500vh;position:relative}
 .snap{position:absolute;left:0;width:1px;height:100vh;scroll-snap-align:start;scroll-snap-stop:always;pointer-events:none}
 .sticky{position:sticky;top:0;height:100vh;overflow:hidden}
@@ -235,6 +234,27 @@ html{scroll-snap-type:y mandatory}
     });
     active=-1;
   });
+  /* one scroll or swipe moves exactly one presenter; at either end the scroll passes on to the page */
+  var busy=false;
+  function goTo(i){ busy=true; scrollTo({top:i*innerHeight,behavior:'smooth'}); setTimeout(function(){ busy=false; },900); }
+  addEventListener('wheel',function(e){
+    var next=Math.round(scrollY/innerHeight)+(e.deltaY>0?1:-1);
+    if(next<0||next>N-1) return;
+    e.preventDefault();
+    if(!busy) goTo(next);
+  },{passive:false});
+  var touchY=null;
+  addEventListener('touchstart',function(e){ touchY=e.touches[0].clientY; },{passive:true});
+  addEventListener('touchmove',function(e){
+    if(touchY===null) return;
+    var dy=touchY-e.touches[0].clientY;
+    if(Math.abs(dy)<40) return;
+    var next=Math.round(scrollY/innerHeight)+(dy>0?1:-1);
+    touchY=null;
+    if(next<0||next>N-1) return;
+    e.preventDefault();
+    if(!busy) goTo(next);
+  },{passive:false});
   var rot=0;
   var reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
   function turn(current,goal,speed){
